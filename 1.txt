@@ -1,0 +1,20 @@
+pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cu124
+ls -A | wc -l
+watch -n 1 nvidia-smi 
+python -m torch.distributed.run --nproc_per_node 4 train.py --device 0,1,2,3
+python -m torch.distributed.run --nproc_per_node 4 train.py --epochs=100 --batch 64 --data Objects365.yaml --weights yolov10m.pt --device 0,1,2,3 --imgsz=640
+ccc
+torchrun --nproc_per_node=4 test_ddp.py
+python
+import torch
+print(f"Available GPUs: {torch.cuda.device_count()}")
+print(f"CUDA version: {torch.version.cuda}")
+#!/bin/bash
+for zipfile in train*.zip; do
+  unzip -o "$zipfile" -d .
+done
+yolo detect train data=Objects365.yaml model=yolov10m.pt epochs=100  batch=64  imgsz=640  device=0,1,2,3
+python -m torch.distributed.run --nproc_per_node 4 demo.py
+ 精确率（Precision）= TP / (TP + FP)
+ 召回率（Recall）= TP / 该类别总的真实框数量
+
